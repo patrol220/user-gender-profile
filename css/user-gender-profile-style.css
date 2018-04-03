@@ -1,0 +1,33 @@
+.pk-ugp-no-gender {
+    border-color: gray !important;
+}
+.pk-ugp-man {
+    border-color: #55a3ce !important;
+}
+.pk-ugp-woman {
+    border-color: #e283d3 !important;
+}
+
+.pk-ugp-side-top {
+    border-width: 3px 0 0 0 !important;
+    border-style: solid !important;
+}
+
+.pk-ugp-side-right {
+    border-width: 0 3px 0 0 !important;
+    border-style: solid !important;
+}
+
+.pk-ugp-side-bottom {
+    border-width: 0 0 3px 0 !important;
+    border-style: solid !important;
+}
+
+.pk-ugp-side-left {
+    border-width: 0 0 0 3px !important;
+    border-style: solid !important;
+}
+
+.avatar {
+    box-sizing: content-box !important;
+}
