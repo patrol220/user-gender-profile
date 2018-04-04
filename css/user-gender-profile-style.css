@@ -29,5 +29,6 @@
 }
 
 .avatar {
+    padding: 0 !important;
     box-sizing: content-box !important;
 }
