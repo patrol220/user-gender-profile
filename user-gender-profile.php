@@ -9,12 +9,39 @@
 
 ?>
 <?php
+
+function pk_ugp_uninstall() {
+    delete_option('pk_ugp_options');
+    $users = get_users();
+    foreach ($users as $user) {
+        delete_user_meta($user->ID, 'pk_ugp_gender');
+    }
+}
+register_uninstall_hook(__FILE__, 'pk_ugp_uninstall');
+
+function pk_ugp_activated() {
+    $options_default = array(
+        'colour_man' => '#2650be',
+        'colour_woman' => '#be1abc',
+        'colour_nogender' => '#7f7f7f',
+        'side' => 'bottom'
+    );
+    add_option('pk_ugp_options', $options_default);
+}
+register_activation_hook(__FILE__, 'pk_ugp_activated');
+
+function pk_ugp_prepare_translations() {
+    load_plugin_textdomain('user-gender-profile', false, basename( dirname( __FILE__ ) ) . '/languages');
+}
+add_action('plugins_loaded', 'pk_ugp_prepare_translations');
+
 function pk_ugp_apply_gender($avatar_image, $id_or_email, $size, $default, $alt) {
     $avatar_url = get_avatar_url($id_or_email, array('size' => $size));
     $options = get_option('pk_ugp_options');
     $avatar_side_class = 'pk-ugp-side-' . $options['side'];
     $color_man = $options['colour_man'];
     $color_woman = $options['colour_woman'];
+    $color_nogender = $options['colour_nogender'];
 
     if(is_numeric($id_or_email)) {
         $user_id = (int)$id_or_email;
@@ -22,6 +49,7 @@ function pk_ugp_apply_gender($avatar_image, $id_or_email, $size, $default, $alt)
     elseif(is_object($id_or_email)) {
         $user_id = $id_or_email->user_id;
     }
+
     if(isset($user_id) && $user_id != 0) {
         if($user_gender = get_user_meta($user_id, 'pk_ugp_gender', true)) {
             if($user_gender == 'man') {
@@ -31,20 +59,19 @@ function pk_ugp_apply_gender($avatar_image, $id_or_email, $size, $default, $alt)
                 $avatar_style = "border-color: $color_woman;";
             }
             else {
-                $avatar_class = 'pk-ugp-no-gender';
+                $avatar_style = "border-color: $color_nogender;";
             }
         }
         else {
-            $avatar_class = 'pk-ugp-no-gender';
+            $avatar_style = "border-color: $color_nogender;";
         }
     }
     else {
-        $avatar_class = 'pk-ugp-no-gender';
+        $avatar_style = "border-color: $color_nogender;";
     }
     $avatar = "<img alt='$alt' src='$avatar_url' style='$avatar_style' class='avatar avatar-$size photo $avatar_side_class' height='$size' width='$size' />";
     return $avatar;
 }
-
 function pk_ugp_init() {
     add_filter('get_avatar', 'pk_ugp_apply_gender', 10, 5);
     wp_enqueue_style('pk-ugp-style', plugin_dir_url(__FILE__) . 'css/user-gender-profile-style.css');
@@ -66,7 +93,7 @@ function pk_ugp_options_code() {
             settings_fields('pk_ugp_options');
             do_settings_sections('pk_ugp')
             ?>
-            <input type="submit" name="submit" class="button-primary" value="Zapisz">
+            <input type="submit" name="submit" class="button-primary" value="<?=__('Save', 'user-gender-profile')?>">
         </form>
     </div>
     <?php
@@ -74,16 +101,18 @@ function pk_ugp_options_code() {
 
 function pk_ugp_admin_init() {
     register_setting('pk_ugp_options', 'pk_ugp_options', 'pk_ugp_validate_options');
-    add_settings_section('pk_ugp_settings_main', 'Ustawienia wtyczki', 'pk_ugp_settings_main_text', 'pk_ugp');
-    add_settings_field('pk_ugp_gender_side', 'Podaj stronę wyświetlania paska płci', 'pk_ugp_setting_side_select', 'pk_ugp', 'pk_ugp_settings_main');
-    add_settings_field('pk_ugp_man_colour', 'Wybierz kolor paska płci mężczyzny', 'pk_ugp_man_colour_input', 'pk_ugp', 'pk_ugp_settings_main');
-    add_settings_field('pk_ugp_woman_colour', 'Wybierz kolor paska płci kobiety', 'pk_ugp_woman_colour_input', 'pk_ugp', 'pk_ugp_settings_main');
-    add_settings_field('pk_ugp_nogender_colour', 'Wybierz kolor paska gdy brak ustawionej płci', 'pk_ugp_nogender_colour_input', 'pk_ugp', 'pk_ugp_settings_main');
+    add_settings_section('pk_ugp_settings_main', __('Plugin settings', 'user-gender-profile'), 'pk_ugp_settings_main_text', 'pk_ugp');
+    add_settings_field('pk_ugp_gender_side', __('Side of gender bar', 'user-gender-profile'), 'pk_ugp_setting_side_select', 'pk_ugp', 'pk_ugp_settings_main');
+    add_settings_field('pk_ugp_man_colour', __('Man gender bar color', 'user-gender-profile'), 'pk_ugp_man_colour_input', 'pk_ugp', 'pk_ugp_settings_main');
+    add_settings_field('pk_ugp_woman_colour', __('Woman gender bar color', 'user-gender-profile'), 'pk_ugp_woman_colour_input', 'pk_ugp', 'pk_ugp_settings_main');
+    add_settings_field('pk_ugp_nogender_colour', __('Gender bar color when gender is not set', 'user-gender-profile'), 'pk_ugp_nogender_colour_input', 'pk_ugp', 'pk_ugp_settings_main');
 }
 add_action('admin_init', 'pk_ugp_admin_init');
 
 function pk_ugp_settings_main_text() {
-    echo "<p>W tym miejscu zdefiniuj ustawienia</p>";
+    ?>
+    <p><?=__('In that place you can modify appearance options of plugin', 'user-gender-profile')?></p>
+    <?php
 }
 
 function pk_ugp_setting_side_select() {
@@ -91,10 +120,10 @@ function pk_ugp_setting_side_select() {
     $side = $options['side']
     ?>
     <select name="pk_ugp_options[side]">
-        <option value="left" <?=selected($side,'left')?>>Lewo</option>
-        <option value="right" <?=selected($side,'right')?>>Prawo</option>
-        <option value="top" <?=selected($side,'top')?>>Góra</option>
-        <option value="bottom" <?=selected($side,'bottom')?>>Dół</option>
+        <option value="left" <?=selected($side,'left')?>><?=__('Left', 'user-gender-profile')?></option>
+        <option value="right" <?=selected($side,'right')?>><?=__('Right', 'user-gender-profile')?></option>
+        <option value="top" <?=selected($side,'top')?>><?=__('Top', 'user-gender-profile')?></option>
+        <option value="bottom" <?=selected($side,'bottom')?>><?=__('Bottom', 'user-gender-profile')?></option>
     </select>
     <?php
 }
@@ -157,12 +186,12 @@ function pk_ugp_display_field($user) {
     ?>
 
     <tr>
-        <th scope="row">Płeć</th>
+        <th scope="row"><?=__('Gender', 'user-gender-profile')?></th>
         <td>
             <select name="pk_ugp_gender">
-                <option value="none" <?=selected('none', $gender)?>>Brak</option>
-                <option value="man" <?=selected('man', $gender)?>>Mężczyzna</option>
-                <option value="woman" <?=selected('woman', $gender)?>>Kobieta</option>
+                <option value="none" <?=selected('none', $gender)?>><?=__('None', 'user-gender-profile')?></option>
+                <option value="man" <?=selected('man', $gender)?>><?=__('Man', 'user-gender-profile')?></option>
+                <option value="woman" <?=selected('woman', $gender)?>><?=__('Woman', 'user-gender-profile')?></option>
             </select>
         </td>
     </tr>
