@@ -21,9 +21,9 @@ register_uninstall_hook(__FILE__, 'pk_ugp_uninstall');
 
 function pk_ugp_activated() {
     $options_default = array(
-        'colour_man' => '#2650be',
-        'colour_woman' => '#be1abc',
-        'colour_nogender' => '#7f7f7f',
+        'color_man' => '#2650be',
+        'color_woman' => '#be1abc',
+        'color_nogender' => '#7f7f7f',
         'side' => 'bottom'
     );
     add_option('pk_ugp_options', $options_default);
@@ -39,9 +39,9 @@ function pk_ugp_apply_gender($avatar_image, $id_or_email, $size, $default, $alt)
     $avatar_url = get_avatar_url($id_or_email, array('size' => $size));
     $options = get_option('pk_ugp_options');
     $avatar_side_class = 'pk-ugp-side-' . $options['side'];
-    $color_man = $options['colour_man'];
-    $color_woman = $options['colour_woman'];
-    $color_nogender = $options['colour_nogender'];
+    $color_man = $options['color_man'];
+    $color_woman = $options['color_woman'];
+    $color_nogender = $options['color_nogender'];
 
     if(is_numeric($id_or_email)) {
         $user_id = (int)$id_or_email;
@@ -103,9 +103,9 @@ function pk_ugp_admin_init() {
     register_setting('pk_ugp_options', 'pk_ugp_options', 'pk_ugp_validate_options');
     add_settings_section('pk_ugp_settings_main', __('Plugin settings', 'user-gender-profile'), 'pk_ugp_settings_main_text', 'pk_ugp');
     add_settings_field('pk_ugp_gender_side', __('Side of gender bar', 'user-gender-profile'), 'pk_ugp_setting_side_select', 'pk_ugp', 'pk_ugp_settings_main');
-    add_settings_field('pk_ugp_man_colour', __('Man gender bar color', 'user-gender-profile'), 'pk_ugp_man_colour_input', 'pk_ugp', 'pk_ugp_settings_main');
-    add_settings_field('pk_ugp_woman_colour', __('Woman gender bar color', 'user-gender-profile'), 'pk_ugp_woman_colour_input', 'pk_ugp', 'pk_ugp_settings_main');
-    add_settings_field('pk_ugp_nogender_colour', __('Gender bar color when gender is not set', 'user-gender-profile'), 'pk_ugp_nogender_colour_input', 'pk_ugp', 'pk_ugp_settings_main');
+    add_settings_field('pk_ugp_man_color', __('Man gender bar color', 'user-gender-profile'), 'pk_ugp_man_color_input', 'pk_ugp', 'pk_ugp_settings_main');
+    add_settings_field('pk_ugp_woman_color', __('Woman gender bar color', 'user-gender-profile'), 'pk_ugp_woman_color_input', 'pk_ugp', 'pk_ugp_settings_main');
+    add_settings_field('pk_ugp_nogender_color', __('Gender bar color when gender is not set', 'user-gender-profile'), 'pk_ugp_nogender_color_input', 'pk_ugp', 'pk_ugp_settings_main');
 }
 add_action('admin_init', 'pk_ugp_admin_init');
 
@@ -128,47 +128,47 @@ function pk_ugp_setting_side_select() {
     <?php
 }
 
-function pk_ugp_man_colour_input() {
+function pk_ugp_man_color_input() {
     $options = get_option('pk_ugp_options');
-    $colour = $options['colour_man'];
+    $color = $options['color_man'];
     ?>
-    <input type="text" name="pk_ugp_options[colour_man]" id='color-picker-man' value="<?=esc_attr($colour)?>" />
+    <input type="text" name="pk_ugp_options[color_man]" id='color-picker-man' value="<?=esc_attr($color)?>" />
     <?php
 }
-function pk_ugp_woman_colour_input() {
+function pk_ugp_woman_color_input() {
     $options = get_option('pk_ugp_options');
-    $colour = $options['colour_woman'];
+    $color = $options['color_woman'];
     ?>
-    <input type="text" name="pk_ugp_options[colour_woman]" id='color-picker-woman' value="<?=esc_attr($colour)?>" />
+    <input type="text" name="pk_ugp_options[color_woman]" id='color-picker-woman' value="<?=esc_attr($color)?>" />
     <?php
 }
-function pk_ugp_nogender_colour_input() {
+function pk_ugp_nogender_color_input() {
     $options = get_option('pk_ugp_options');
-    $colour = $options['colour_nogender'];
+    $color = $options['color_nogender'];
     ?>
-    <input type="text" name="pk_ugp_options[colour_nogender]" id='color-picker-nogender' value="<?=esc_attr($colour)?>" />
+    <input type="text" name="pk_ugp_options[color_nogender]" id='color-picker-nogender' value="<?=esc_attr($color)?>" />
     <?php
 }
 
 function pk_ugp_validate_options($input) {
     $valid = array();
-    if(preg_match('/^#[0-9A-Fa-f]{6}$/', $input['colour_man'])) {
-        $valid['colour_man'] = $input['colour_man'];
+    if(preg_match('/^#[0-9A-Fa-f]{6}$/', $input['color_man'])) {
+        $valid['color_man'] = $input['color_man'];
     }
     else {
-        $valid['colour_man'] = '#ffffff';
+        $valid['color_man'] = '#ffffff';
     }
-    if(preg_match('/^#[0-9A-Fa-f]{6}$/', $input['colour_woman'])) {
-        $valid['colour_woman'] = $input['colour_woman'];
-    }
-    else {
-        $valid['colour_woman'] = '#ffffff';
-    }
-    if(preg_match('/^#[0-9A-Fa-f]{6}$/', $input['colour_nogender'])) {
-        $valid['colour_nogender'] = $input['colour_nogender'];
+    if(preg_match('/^#[0-9A-Fa-f]{6}$/', $input['color_woman'])) {
+        $valid['color_woman'] = $input['color_woman'];
     }
     else {
-        $valid['colour_nogender'] = '#ffffff';
+        $valid['color_woman'] = '#ffffff';
+    }
+    if(preg_match('/^#[0-9A-Fa-f]{6}$/', $input['color_nogender'])) {
+        $valid['color_nogender'] = $input['color_nogender'];
+    }
+    else {
+        $valid['color_nogender'] = '#ffffff';
     }
     $valid_sides = array('left', 'right', 'top', 'bottom');
     if(in_array($input['side'], $valid_sides)) {
